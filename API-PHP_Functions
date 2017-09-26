@@ -1,0 +1,77 @@
+<?php
+
+//jitbit form functions
+
+$username = "your admin username";
+$password = "your admin password";
+
+//jitbit Pot function
+function jitbitPost($url,$vars,$username,$password)
+{
+  $postData = '';
+   //create name value pairs seperated by &
+   foreach($vars as $k => $v) 
+   { 
+      $postData .= $k . '='.$v.'&'; 
+   }
+   $postData = rtrim($postData, '&');
+ 
+    $ch = curl_init();  
+ 
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_HEADER, false);
+    curl_setopt($ch,CURLOPT_USERPWD,"$username:$password"); 
+    curl_setopt($ch,CURLOPT_POST, count($postData));
+    curl_setopt($ch,CURLOPT_POSTFIELDS, $postData);    
+ 
+    $output=curl_exec($ch);
+ 
+    curl_close($ch);
+    return $output;
+ 
+}
+
+//Fount parts of these code searching the net.  I created 
+//the two GET and POST functions you can use to search jitbit or
+//POST to the app.  Consult the jitbit online API doc to find the exact URL to post or get.
+
+//Example calling the GET function
+$jitbitsearch =  jitbitGet($TheURLget,$username,$password);
+
+//jitbit Get function
+function jitbitGet($url,$username,$password)
+{
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, "$url");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+	curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+
+$responseBody = curl_exec($ch);
+$responseInfo = curl_getinfo($ch);
+curl_close($ch);
+
+if ($responseInfo["http_code"]!=200 && $responseInfo["http_code"]!=201) {
+  
+  echo "ERROR <BR>";
+  print_r($responseInfo);
+  echo $responseBody;
+  
+  
+} else {
+	
+  $Result = json_decode($responseBody);
+  
+}
+
+return $responseBody;
+}
+
+//Example calling the POST function
+//setup an array for $UserVars
+$NewUser = jitbitPost($UserURL,$UserVars,$username,$password);
+
+
+?>
